@@ -1,0 +1,13 @@
+.navigation {
+  border-bottom: 1px solid #bbb;
+  margin: -1rem 0 1rem;
+  display: flex;
+  column-gap: 1rem;
+
+  a {
+    font-size: 1.25rem;
+    font-weight: 300;
+    line-height: 3;
+    display: inline-block;
+  }
+}
