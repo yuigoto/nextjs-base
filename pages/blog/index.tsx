@@ -1,74 +1,185 @@
 import Head from "next/head";
-import { getMarkdownIndex } from "core/utils/markdown";
-import { BlogListItem } from "core/types/blog";
-import { Pagination } from "components/elements/Pagination";
-import { BlogItem } from "components/blog/BlogItem";
+import { Component } from "react";
+import { withRouter } from "next/router";
+import { NextPageContext } from "next";
+import Link from "next/link";
+
+import { HashMap, NextRouterProps } from "core/types";
+import { GetPage } from "services/MdBlogService";
+import { IMarkdownFile } from "core/interfaces";
+import { Paginate } from "components/elements/Paginate";
+
+/**
+ * Define props aceitas pelo componente.
+ */
+interface IPageProps extends NextRouterProps {
+  posts?: any[];
+  page?: number;
+  totalPages?: number;
+}
+
+/**
+ * Define chaves permitidas no state do componente.
+ */
+interface IPageState extends HashMap<any> {
+  posts?: any[];
+  page?: number;
+  totalPages?: number;
+}
+
+/**
+ * Usado para definir os dados passados pelo contexto.
+ */
+interface IPageContext extends NextPageContext {}
 
 /**
  * pages/blog
  * ----------------------------------------------------------------------
+ * Home do blog.
+ * 
+ * @since 0.2.0
  */
+class Page extends Component<IPageProps, IPageState, IPageContext> {
+  // PROPRIEDADES ESTÁTICAS
+  // --------------------------------------------------------------------
+  
+  /**
+   * Valores padrão para props.
+   */
+  static defaultProps: IPageProps = {
+    router: null
+  };
+  
+  // MÉTODOS ESTÁTICOS
+  // --------------------------------------------------------------------
+  
+  /**
+   * Usado para pré-carregar dados durante SSR. Também é usado no export para 
+   * pré-hidratar as páginas.
+   * 
+   * @param ctx 
+   */
+  static async getInitialProps (ctx: IPageContext): Promise<any> {
+    const {
+      query
+    } = ctx;
+    
+    let pageProps: any = {};
+    
+    pageProps.page = query.page || 1;
+    if (query.posts && query.posts.length > 0) {
+      pageProps.posts = query.posts || [];
+      pageProps.totalPages = query.totalPages || 0;
+    } else {
+      let fetch = GetPage("blog", pageProps.page);
+      pageProps.posts = fetch.posts;
+      pageProps.totalPages = fetch.totalPages;
+    }
+    
+    return pageProps;
+  }
+  
+  // PROPRIEDADES
+  // --------------------------------------------------------------------
+  
+  /**
+   * Estado da página.
+   */
+  state: Readonly<IPageState> = {};
 
-/**
- * Quantos posts por página devem ser exibidos.
- */
-const PER_PAGE: number = 5;
+  /**
+   * Status de montagem.
+   *
+   * Em alguns casos é necessário para mim, mas sinta-se livre para excluir.
+   */
+  mounted: boolean = false;
+  
+  // LIFECYCLE
+  // --------------------------------------------------------------------
+  
+  constructor (props) {
+    super(props);
+    
+    this.state = {
+      page: props.page,
+      posts: props.posts,
+      totalPages: props.totalPages
+    };
+  }
+  
+  componentDidMount () {
+    console.log(`[${Page.name}] montado.`);
+    this.mounted = true;
+  }
+  
+  componentDidUpdate (prevProps) {
+    if (this.props.page !== prevProps.page) {
+      this.setState(
+        Object.assign({}, GetPage("blog", this.props.page))
+      );
+    }
+  }
+  
+  componentWillUnmount () {
+    console.log(`[${Page.name}] desmontado.`);
+    this.mounted = false;
+  }
+  
+  renderPosts = () => {
+    const {
+      posts
+    } = this.state;
+    
+    return posts.map((item, key) => {
+      const load: IMarkdownFile = require(`data/blog/${item}.md`);
+      const {
+        attributes
+      } = load;
+      
+      let date = new Date(attributes.date);
+      
+      return (
+        <div key={key} className={"blog-item"}>
+          <time dateTime={attributes.date}>
+            {date.toLocaleDateString()}
+          </time>
+          <h3>
+            <Link 
+              href={`/blog/${item}`}>
+              {attributes.title}
+            </Link>
+          </h3>
+        </div>
+      );
+    });
+  };
+  
+  render () {
+    return (
+      <>
+        <Head>
+          <title>NextJS Boilerplate - Blog</title>
+          <link rel={"favicon"} href={"/favicon.ico"}/>
+        </Head>
 
-/**
- * Interface de props da página.
- */
-interface IPageProps {
-  page?: number;
+        <h2>Blog</h2>
+
+        <p className={"breadcrumb"}>
+          <Link href={"/"}>
+            &lt;&lt; Voltar
+          </Link>
+        </p>
+        
+        {this.renderPosts()}
+        
+        <Paginate
+          className={"paginate"}
+          path={`/blog/page`}
+          page={this.state.page}
+          totalPages={this.state.totalPages}/>
+      </>
+    );
+  }
 }
 
-const Page = ({
-  page
-}: IPageProps) => {
-  const blog: BlogListItem[] = getMarkdownIndex("blog");
-  blog.sort((a, b) => {
-    return a.date < b.date ? 1 : -1;
-  });
-  const totalPages = Math.ceil(blog.length / PER_PAGE);
-  const offset = (page - 1) * PER_PAGE;
-  const limit = offset + PER_PAGE;
-  const pageData = blog.slice(offset, limit);
-
-  const posts = pageData.map((item, key) => {
-    return (
-      <BlogItem post={item} key={key}/>
-    );
-  });
-
-  return (
-    <>
-      <Head>
-        <title>NextJS Base : Blog</title>
-      </Head>
-
-      <h2 className={"display-4 text-muted"}>Blog</h2>
-
-      <hr/>
-
-      {posts.length > 0 && (
-        <div>
-          {posts}
-          <Pagination
-            totalPages={totalPages}
-            page={page}
-            path={"blog/page"}
-            numeric={true}/>
-        </div>
-      )}
-
-      {posts.length < 1 && (
-        <p>Nenhum post encontrado.</p>
-      )}
-    </>
-  );
-};
-
-Page.defaultProps = {
-  page: 1
-};
-
-export default Page;
+export default withRouter(Page);

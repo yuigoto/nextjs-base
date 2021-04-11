@@ -1,0 +1,14 @@
+version: "3.7"
+services:
+  client:
+    container_name: nextjs-base
+    build:
+      context: .
+      dockerfile: dockerfile
+    volumes:
+      - ".:/app"
+      - "/app/node_modules"
+    ports:
+      - 3030:3000
+    environment:
+      - NODE_ENV=development

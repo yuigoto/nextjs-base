@@ -5,6 +5,8 @@
  * erros de compilação ao importar arquivos de forma não-convencional.
  *
  * Não é necessário editar isso muito.
+ *
+ * @since       0.0.1
  */
 
 // CUSTOM COMPONENT

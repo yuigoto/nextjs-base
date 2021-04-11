@@ -1,0 +1,5 @@
+{
+  "env": {
+    "MONGODB_URI": "@yuiti_mongodb_uri"
+  }
+}

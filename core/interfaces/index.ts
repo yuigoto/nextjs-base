@@ -1,44 +1,67 @@
-import { ClassValue, HashMap } from "core/types";
+import {
+  ClassValue,
+  HashMap
+} from "core/types";
+import {
+  CSSProperties,
+  ReactNode
+} from "react";
 
 /**
  * core/interfaces
  * ----------------------------------------------------------------------
  * Interfaces de uso geral.
+ *
+ * @since 0.0.1
  */
 
 /**
- * Array de objetos válidos para classes de um elemento.
+ * Interface para props comuns a diversos elementos HTML e componentes.
  *
- * Usado pela lib `classnames`.
+ * @since 0.0.1
+ */
+export interface IBaseProps extends HashMap<any> {
+  id?: string|null;
+  className?: ClassValue;
+  children?: ReactNode;
+  style?: CSSProperties|null|undefined;
+}
+
+/**
+ * Interface para props usadas na lib `classnames`.
+ *
+ * @since 0.0.1
  */
 export interface IClassArray extends Array<ClassValue> {}
 
 /**
- * Objeto Markdown, importado via `frontmatter-markdown-loader`.
+ * Inteface para objetos importados via `frontmatter-markdown-loader`.
+ * 
+ * @since 0.0.1
  */
 export interface IMarkdownFile extends HashMap<any> {
   /**
-   * Atributos do frontmatter.
+   * Lista com atributos do frontmatter.
    */
   attributes?: HashMap<any>;
-
+  
   /**
-   * Corpo renderizado em HTML.
+   * HTML renderizado.
    */
   html?: string;
-
+  
   /**
-   * Corpo em Markdown puro.
+   * Markdown puro.
    */
   body?: string;
-
+  
   /**
-   * Metadados do markdown.
+   * Metadados do arquivo.
    */
   meta?: HashMap<any>;
-
+  
   /**
-   * Componente React.
+   * Componente React pronto para uso.
    */
   react?: Function;
 }

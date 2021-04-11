@@ -1,30 +1,33 @@
-import { BaseProps, HashMap } from "core/types";
-import { FunctionComponent } from "react";
+import { IBaseProps } from "core/interfaces";
+import { HashMap } from "core/types";
 import { classnames } from "core/utils";
-import { FooterContainer } from "components/base/containers";
+import { FunctionComponent } from "react";
 
-interface IFooterProps extends BaseProps {}
+interface IFooter extends IBaseProps {}
 
-export const Footer: FunctionComponent<IFooterProps> = ({
+export const Footer: FunctionComponent<IFooter> = ({
   id,
   className,
   style
 }) => {
-  const _attr: HashMap<any> = {};
+  let _attr: HashMap<any> = {};
   if (id) _attr.id = id;
   if (className) _attr.className = classnames(className);
-  if (style) _attr.style = classnames(style);
-
+  if (style) _attr.style = style;
+  
   return (
-    <FooterContainer {..._attr}>
+    <footer {..._attr}>
       <p>
-        <small>&copy;2021 YUITI</small>
+        <small>
+          &copy;2020 Fabio Y. Goto
+        </small>
       </p>
-    </FooterContainer>
+    </footer>
   );
 };
 
 Footer.defaultProps = {
-  id: "footer",
-  className: null
+  id: null,
+  className: null,
+  style: null
 };

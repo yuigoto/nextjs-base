@@ -1,103 +1,163 @@
 import Head from "next/head";
-import { Pagination } from "components/elements/Pagination";
-import { GetStaticProps } from "next";
-import axios from "axios";
-import { useEffect, useState } from "react";
-import { UserListItem } from "core/types/users";
-import { UserItem } from "components/users/UserItem";
-import { getUsersPage } from "pages/api/users";
+import { Component } from "react";
+import { withRouter } from "next/router";
+import { NextPageContext } from "next";
+import { HashMap, NextRouterProps } from "core/types";
+import { GetUserPage } from "services/UserService";
+import Link from "next/link";
+import { Paginate } from "components/elements/Paginate";
 
 /**
- * pages/users/
- * ----------------------------------------------------------------------
+ * Define props aceitas pelo componente.
  */
-
-/**
- * Quantos posts por página devem ser exibidos.
- */
-const PER_PAGE: number = 3;
-
-const getPosts = async (page) => {
-  const request = await axios
-    .get(`/api/users?page=${page}`);
-
-  return request.data;
-};
-
-export const getStaticProps: GetStaticProps = async (context) => {
-  const request = await getUsersPage(1);
-  const [ users, count ] = request;
-
-  return {
-    props: {
-      page: 1,
-      users: users.map((item) => {
-        return JSON.parse(JSON.stringify(item));
-      }),
-      totalResults: count
-    }
-  };
-};
-
-/**
- * Interface de props da página.
- */
-interface IPageProps {
-  page?: number;
-  users?: UserListItem[];
-  totalResults?: number;
+interface IPageProps extends NextRouterProps {
+  pageId?: string|number;
+  totalPages?: string|number;
+  users?: any[];
 }
 
-const Page = ({
-  page,
-  users,
-  totalResults
-}: IPageProps) => {
-  const [ postData, setPostData ] = useState(users);
-  const [ totalPages, setTotalPages ] = useState(
-    Math.ceil(totalResults / PER_PAGE)
-  );
+/**
+ * Define chaves permitidas no state do componente.
+ */
+interface IPageState extends HashMap<any> {
+  pageId?: string|number;
+  totalPages?: string|number;
+  users?: any[];
+}
 
-  useEffect(() => {
-    getPosts(page)
-      .then(e => {
-        setPostData(e.users);
-        setTotalPages(Math.ceil(e.totalResults / PER_PAGE));
-      });
-  }, [ page ]);
+/**
+ * Usado para definir os dados passados pelo contexto.
+ */
+interface IPageContext extends NextPageContext {}
 
-  return (
-    <>
-      <Head>
-        <title>NextJS Base : Usuários : Página {page}</title>
-      </Head>
+/**
+ * pages/users
+ * ----------------------------------------------------------------------
+ * Listagem de usuários com requeste de API.
+ * 
+ * @since 0.2.0
+ */
+class Page extends Component<IPageProps, IPageState, IPageContext> {
+  // PROPRIEDADES ESTÁTICAS
+  // --------------------------------------------------------------------
+  
+  /**
+   * Valores padrão para props.
+   */
+  static defaultProps: IPageProps = {
+    router: null
+  };
+  
+  // MÉTODOS ESTÁTICOS
+  // --------------------------------------------------------------------
+  
+  /**
+   * Usado para pré-carregar dados durante SSR. Também é usado no export para 
+   * pré-hidratar as páginas.
+   * 
+   * @param ctx 
+   */
+  static async getInitialProps (ctx: IPageContext): Promise<any> {
+    let pageProps: any = {};
+    
+    const {
+      pageId, 
+      totalPages,
+      users
+    } = ctx.query;
+    
+    pageProps.pageId = pageId;
+    
+    // Verifica se pré-carregou, caso contrário carrega
+    if (totalPages && users) {
+      pageProps.totalPages = totalPages;
+      pageProps.users = users;
+    } else {
+      let data = await GetUserPage(pageId as string);
+      pageProps = Object.assign({}, pageProps, data);
+    }
+    
+    return pageProps;
+  }
+  
+  // PROPRIEDADES
+  // --------------------------------------------------------------------
+  
+  /**
+   * Estado da página.
+   */
+  state: Readonly<IPageState> = {};
 
-      <h2 className={"display-4 text-muted"}>Usuários</h2>
+  /**
+   * Status de montagem.
+   *
+   * Em alguns casos é necessário para mim, mas sinta-se livre para excluir.
+   */
+  mounted: boolean = false;
+  
+  // LIFECYCLE
+  // --------------------------------------------------------------------
+  
+  constructor (props) {
+    super(props);
+    this.state = {};
+  }
+  
+  componentDidMount () {
+    console.log(`[${Page.name}] montado.`);
+    this.mounted = true;
+  }
+  
+  componentWillUnmount () {
+    console.log(`[${Page.name}] desmontado.`);
+    this.mounted = false;
+  }
+  
+  renderPosts = () => {
+    return this.props.users.map((item, key) => {
+      return (
+        <div key={key} className={"list-profile"}>
+          <figure>
+            <img src={item.avatar} alt={""}/>
+          </figure>
+          <div>
+            <h3>{item.first_name}</h3>
 
-      <hr/>
+            <Link href={`/users/user/${item.id}`}>
+              Ver Perfil &gt;&gt;
+            </Link>
+          </div>
+        </div>
+      );
+    });
+  };
+  
+  render () {
+    return (
+      <>
+        <Head>
+          <title>NextJS Boilerplate</title>
+          <link rel={"favicon"} href={"/favicon.ico"}/>
+        </Head>
 
-      {postData.map((item, key) => {
-        return (
-          <>
-            {key > 0 && (
-              <hr key={`hr-${key}`}/>
-            )}
-            <UserItem post={item} key={key}/>
-          </>
-        );
-      })}
-      <Pagination
-        firstPagePath={"/users"}
-        totalPages={totalPages}
-        page={page}
-        path={"/users/page"}
-        numeric={true}/>
-    </>
-  );
-};
+        <h2>Usuários</h2>
 
-Page.defaultProps = {
-  page: 1
-};
+        <p className={"breadcrumb"}>
+          <Link href={"/"}>
+            &lt;&lt; Voltar
+          </Link>
+        </p>
 
-export default Page;
+        {this.renderPosts()}
+
+        <Paginate
+          className={"paginate"}
+          path={`/users`}
+          page={this.props.pageId}
+          totalPages={this.props.totalPages}/>
+      </>
+    );
+  }
+}
+
+export default withRouter(Page);
