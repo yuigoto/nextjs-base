@@ -192,7 +192,7 @@ nextConfig.webpack = (config) => {
     A ideia é evitar imports usando "../../../" (ad infinitum).
    */
   config.resolve.modules.push(
-    path.resolve(WORK_DIR)
+    path.resolve("./")
   );
 
   return config;
