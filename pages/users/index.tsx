@@ -1,68 +1,35 @@
-import Head from "next/head";
-import { Pagination } from "components/elements/Pagination";
-import { GetStaticProps } from "next";
-import axios from "axios";
 import { useEffect, useState } from "react";
-import { UserListItem } from "core/types/users";
-import { UserItem } from "components/users/UserItem";
-import { getUsersPage } from "pages/api/users";
+import axios from "axios";
+import Head from "next/head";
+import { API_ROOT } from "core/constants";
+import { UserItem } from "components/elements/users/UserItem";
+import { Pagination } from "components/widgets/pagination/Pagination";
 
-/**
- * pages/users/
- * ----------------------------------------------------------------------
- */
-
-/**
- * Quantos posts por página devem ser exibidos.
- */
 const PER_PAGE: number = 3;
 
-const getPosts = async (page) => {
-  const request = await axios
-    .get(`/api/users?page=${page}`);
-
-  return request.data;
+const getUsersFromApi = async (page) => {
+  const fetch = await axios.get(`${API_ROOT}api/users?page=${page}`);
+  return fetch.data;
 };
 
-export const getStaticProps: GetStaticProps = async (context) => {
-  const request = await getUsersPage(1);
-  const [ users, count ] = request;
-
-  return {
-    props: {
-      page: 1,
-      users: users.map((item) => {
-        return JSON.parse(JSON.stringify(item));
-      }),
-      totalResults: count
-    }
-  };
-};
-
-/**
- * Interface de props da página.
- */
 interface IPageProps {
-  page?: number;
-  users?: UserListItem[];
+  page?: number|string;
+  users?: [];
   totalResults?: number;
 }
 
-const Page = ({
-  page,
-  users,
-  totalResults
-}: IPageProps) => {
+const Page = ({ page, users, totalResults }: IPageProps) => {
   const [ postData, setPostData ] = useState(users);
   const [ totalPages, setTotalPages ] = useState(
     Math.ceil(totalResults / PER_PAGE)
   );
 
   useEffect(() => {
-    getPosts(page)
+    getUsersFromApi(page)
       .then(e => {
-        setPostData(e.users);
-        setTotalPages(Math.ceil(e.totalResults / PER_PAGE));
+        const { totalResults, results } = e;
+        setPostData(e.results);
+        setTotalPages(Math.ceil(totalResults / PER_PAGE));
       });
   }, [ page ]);
 
@@ -78,14 +45,15 @@ const Page = ({
 
       {postData.map((item, key) => {
         return (
-          <>
+          <div key={key}>
             {key > 0 && (
               <hr key={`hr-${key}`}/>
             )}
             <UserItem post={item} key={key}/>
-          </>
+          </div>
         );
       })}
+
       <Pagination
         firstPagePath={"/users"}
         totalPages={totalPages}
@@ -98,6 +66,20 @@ const Page = ({
 
 Page.defaultProps = {
   page: 1
+};
+
+export const getStaticProps = async ({ params }) => {
+  const { page } = (params || {});
+
+  const request = await getUsersFromApi(page || 1);
+
+  return {
+    props: {
+      page: page || 1,
+      users: request.results,
+      totalResults: request.totalResults
+    }
+  };
 };
 
 export default Page;

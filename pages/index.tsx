@@ -1,21 +1,11 @@
 import Head from "next/head";
-import { Anchor } from "components/atoms/elements/Anchor";
 import { HomeNaviContainer } from "components/base/containers";
-
-/**
- * pages/index
- * ----------------------------------------------------------------------
- * View raíz da aplicação.
- */
+import { Anchor } from "components/elements/link/Anchor";
 
 const routes = [
   {
-    name: "Átomos",
-    path: "/atoms"
-  },
-  {
-    name: "Moléculas",
-    path: "/molecules"
+    name: "Elementos",
+    path: "/elements"
   },
   {
     name: "Página Teste",
@@ -45,9 +35,6 @@ const routes = [
   }
 ];
 
-/**
- * Interface de props da página.
- */
 interface IPageProps {}
 
 const Page = ({}: IPageProps) => {

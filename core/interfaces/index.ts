@@ -3,7 +3,8 @@ import { ClassValue, HashMap } from "core/types";
 /**
  * core/interfaces
  * ----------------------------------------------------------------------
- * Interfaces de uso geral.
+ * @author    Fabio Y. Goto <lab@yuiti.dev>
+ * @since     0.0.1
  */
 
 /**
@@ -18,7 +19,7 @@ export interface IClassArray extends Array<ClassValue> {}
  */
 export interface IMarkdownFile extends HashMap<any> {
   /**
-   * Atributos do frontmatter.
+   * Objeto com atributos do frontmatter.
    */
   attributes?: HashMap<any>;
 
@@ -33,7 +34,7 @@ export interface IMarkdownFile extends HashMap<any> {
   body?: string;
 
   /**
-   * Metadados do markdown.
+   * Objeto com metadados do markdown.
    */
   meta?: HashMap<any>;
 

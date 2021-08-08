@@ -1,17 +1,7 @@
-/**
- * pages/blog/page
- * ----------------------------------------------------------------------
- */
-
 import { useRouter } from "next/router";
 import { useEffect } from "react";
 
-/**
- * Interface de props da página.
- */
-interface IPageProps {}
-
-const Page = ({}: IPageProps) => {
+const Page = () => {
   const router = useRouter();
 
   useEffect(() => {

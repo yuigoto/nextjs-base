@@ -1,15 +1,19 @@
+import { HashMap } from "core/types";
+
 /**
  * core/constants
  * ----------------------------------------------------------------------
- * Constantes globais.
+ * @author    Fabio Y. Goto <lab@yuiti.dev>
+ * @since     0.0.1
  */
-
-import { HashMap } from "core/types";
+export const API_ROOT = (!/\/$/.test(process.env.API_ROOT))
+  ? process.env.API_ROOT + "/"
+  : process.env.API_ROOT;
 
 /**
  * Alias interno para `hasOwnProperty`.
  */
-export const HAS_OWN = {}.hasOwnProperty;
+export const HAS_OWN = Object.prototype.hasOwnProperty;
 
 /**
  * Usado para definir a ordem de preferência na renderização de objetos
@@ -17,7 +21,7 @@ export const HAS_OWN = {}.hasOwnProperty;
  *
  * Ordenado do maior para o menor.
  */
-export const RESPONSIVE_SIZES: string[] = [ "xl", "lg", "md", "sm", "default" ];
+export const RESPONSIVE_SIZES: string[] = ["xl", "lg", "md", "sm", "default"];
 
 /**
  * Strings com templates para compartilhamento de posts em redes sociais.

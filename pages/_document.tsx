@@ -1,35 +1,31 @@
-import Document, { DocumentContext, Html, Head, Main, NextScript } from "next/document";
+import Document, {
+  DocumentContext,
+  Html,
+  Head,
+  Main,
+  NextScript
+} from "next/document";
 import { ServerStyleSheet } from "styled-components";
-import { AppType, RenderPage } from "next/dist/next-server/lib/utils";
 
 /**
  * pages/_document
  * ----------------------------------------------------------------------
- * Raiz do documento do website, fica acima de `_app` na hierarquia.
+ * Raiz do documento, fica acima de `_app` na hierarquia.
+ *
+ * @author    Fabio Y. Goto <lab@yuiti.dev>
+ * @since     0.0.1
  */
 export default class extends Document {
-  // MÉTODOS ESTÁTICOS
-  // --------------------------------------------------------------------
-
-  /**
-   * Solicita props iniciais, server-side, do documento.
-   *
-   * `_document` não é compatível com `getStaticProps`, por isso usamos
-   * isso ainda.
-   *
-   * @param ctx
-   *     Objeto contento valores relativos ao contexto
-   */
   static async getInitialProps (ctx: DocumentContext): Promise<any> {
-    // Garantindo a renderização de stylesheets, se usarmos styled components
-    const sheet: ServerStyleSheet = new ServerStyleSheet();
-    const originalRenderPage: RenderPage = ctx.renderPage;
+    // Garante a renderização de stylesheets ao usar styled components
+    const sheet = new ServerStyleSheet();
+    const originalRenderPage = ctx.renderPage;
 
     try {
       ctx.renderPage = () => {
         return originalRenderPage({
-          enhanceApp: (App: AppType) => (props) => {
-            return sheet.collectStyles(<App {...props}/>);
+          enhanceApp: (App) => (props) => {
+            return sheet.collectStyles(<App {...props} />);
           }
         });
       };
@@ -53,12 +49,12 @@ export default class extends Document {
   render () {
     return (
       <Html>
-        <Head/>
+        <Head />
         <body>
-        <div id={"root"}>
-          <Main />
-        </div>
-        <NextScript/>
+          <div id="root">
+            <Main />
+          </div>
+          <NextScript />
         </body>
       </Html>
     );

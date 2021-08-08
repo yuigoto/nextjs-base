@@ -1,14 +1,9 @@
 /**
  * global.d
  * ----------------------------------------------------------------------
- * Para declaração de módulos e definições de tipos globais, para evitar
- * erros de compilação ao importar arquivos de forma não-convencional.
- *
- * Não é necessário editar isso muito.
+ * @author    Fabio Y. Goto <lab@yuiti.dev>
+ * @since     0.0.1
  */
-
-// CUSTOM COMPONENT
-// ----------------------------------------------------------------------
 declare module "*.json";
 
 declare module "*.md" {
@@ -19,8 +14,6 @@ declare module "*.md" {
   export const react: any;
 }
 
-// IMAGE IMPORTS
-// ----------------------------------------------------------------------
 declare module "*.bmp";
 declare module "*.gif";
 declare module "*.ico";
@@ -31,8 +24,6 @@ declare module "*.svg";
 declare module "*.tif";
 declare module "*.webp";
 
-// FILE IMPORTS
-// ----------------------------------------------------------------------
 declare module "*.7zip";
 declare module "*.doc";
 declare module "*.docx";
@@ -47,16 +38,12 @@ declare module "*.xls";
 declare module "*.xlsx";
 declare module "*.zip";
 
-// FONT FILES
-// ----------------------------------------------------------------------
 declare module ".eot";
 declare module ".otf";
 declare module ".ttf";
 declare module ".woff";
 declare module ".woff2";
 
-// MEDIA FILES
-// ----------------------------------------------------------------------
 declare module "*.avi";
 declare module "*.flac";
 declare module "*.m4a";

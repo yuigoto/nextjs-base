@@ -1,15 +1,14 @@
 import { BaseProps, HashMap } from "core/types";
-import { FunctionComponent } from "react";
 import { classnames } from "core/utils";
 import { FooterContainer } from "components/base/containers";
 
 interface IFooterProps extends BaseProps {}
 
-export const Footer: FunctionComponent<IFooterProps> = ({
+export const Footer = ({
   id,
   className,
   style
-}) => {
+}: IFooterProps) => {
   const _attr: HashMap<any> = {};
   if (id) _attr.id = id;
   if (className) _attr.className = classnames(className);

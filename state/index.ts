@@ -7,10 +7,19 @@ import thunk from "redux-thunk";
 import { composeWithDevTools } from "redux-devtools-extension";
 import { createWrapper } from "next-redux-wrapper";
 
+/**
+ * state
+ * ----------------------------------------------------------------------
+ * Fornece um store básico para Redux.
+ *
+ * @author    Fabio Y. Goto <lab@yuiti.dev>
+ * @since     0.0.1
+ */
+
 // DUCKS
 // ----------------------------------------------------------------------
-import CounterReducer from "state/ducks/Counter";
-import LoaderReducer from "state/ducks/Loader";
+import CounterReducer from "state/ducks/counter";
+import LoaderReducer from "state/ducks/loader";
 
 /**
  * Combina todos os reducers da store em um master.
