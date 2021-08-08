@@ -98,12 +98,12 @@ const deleteHandler: ApiEndpoint = async (req, res) => {
 const endpoint: ApiEndpoint = async (req, res) => {
   try {
     switch (req.method) {
-      case "POST":
-        await postHandler(req, res); break;
-      case "PUT":
-        await putHandler(req, res); break;
-      case "DELETE":
-        await deleteHandler(req, res); break;
+      // case "POST":
+      //   await postHandler(req, res); break;
+      // case "PUT":
+      //   await putHandler(req, res); break;
+      // case "DELETE":
+      //   await deleteHandler(req, res); break;
       default:
         await getHandler(req, res); break;
     }
