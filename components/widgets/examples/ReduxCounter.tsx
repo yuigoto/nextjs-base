@@ -1,5 +1,5 @@
 import { connect } from "react-redux";
-import { CountDecrease, CountIncrease } from "state/ducks/counter";
+import { CountDecrease, CountIncrease } from "state/ducks/Counter";
 import { BaseProps } from "core/types";
 
 interface IReduxCounter extends BaseProps {

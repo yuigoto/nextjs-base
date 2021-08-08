@@ -18,8 +18,8 @@ import { createWrapper } from "next-redux-wrapper";
 
 // DUCKS
 // ----------------------------------------------------------------------
-import CounterReducer from "state/ducks/counter";
-import LoaderReducer from "state/ducks/loader";
+import CounterReducer from "state/ducks/Counter";
+import LoaderReducer from "state/ducks/Loader";
 
 /**
  * Combina todos os reducers da store em um master.
