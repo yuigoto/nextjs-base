@@ -18,7 +18,7 @@ const Page = ({ post, slug }: IPageProps) => {
     if (null === post) {
       router.push("/404").then(e => console.log(e));
     }
-  }, []);
+  });
 
   let file: IMarkdownFile = require(`data/blog/${post.file}.md`);
 
@@ -87,12 +87,6 @@ export const getStaticPaths = async (context) => {
       }
     });
   }
-
-  paths.push({
-    params: {
-      slug: "1245125112215"
-    }
-  })
 
   return {
     paths,

@@ -4,8 +4,7 @@ import Head from "next/head";
 import { API_ROOT } from "core/constants";
 import { UserItem } from "components/elements/users/UserItem";
 import { Pagination } from "components/widgets/pagination/Pagination";
-import { BlogListItem } from "core/types/blog";
-import { getMarkdownIndex } from "core/utils/markdown";
+import { getUsersPage } from "pages/api/users";
 
 const PER_PAGE: number = 3;
 
@@ -27,6 +26,8 @@ const Page = ({ page, users, totalResults }: IPageProps) => {
   );
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
+
     getUsersFromApi(page)
       .then(e => {
         const { totalResults, results } = e;
@@ -59,7 +60,7 @@ const Page = ({ page, users, totalResults }: IPageProps) => {
       <Pagination
         firstPagePath={"/users"}
         totalPages={totalPages}
-        page={parseInt(page)}
+        page={parseInt(page as string)}
         path={"/users/page"}
         numeric={true}/>
     </>
@@ -71,11 +72,11 @@ Page.defaultProps = {
 };
 
 export const getStaticPaths = async (context) => {
-  const { totalResults } = await getUsersFromApi(1);
+  const [ count, users ] = await getUsersPage(1);
 
   const paths = [];
 
-  for (let n = 0; n < Math.ceil(totalResults / PER_PAGE); n++) {
+  for (let n = 0; n < Math.ceil(count / PER_PAGE); n++) {
     paths.push({
       params: {
         page: `${n + 1}`
@@ -91,13 +92,22 @@ export const getStaticPaths = async (context) => {
 
 export const getStaticProps = async ({ params }) => {
   const { page } = (params || {});
-  const { results, totalResults } = await getUsersFromApi(page || 1);
+
+  const [ count, users ] = await getUsersPage(page || 1);
 
   return {
     props: {
       page: page || 1,
-      users: results,
-      totalResults: totalResults
+      users: users.map((item) => {
+        for (let key in item) {
+          if (item[key] instanceof Date) {
+            item[key] = item[key].getTime();
+          }
+        }
+
+        return item;
+      }),
+      totalResults: count, 
     }
   };
 };

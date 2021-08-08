@@ -10,7 +10,7 @@ const Page = () => {
         console.log("Redirect");
       }
     });
-  }, []);
+  }, [ router ]);
 
   return null;
 };

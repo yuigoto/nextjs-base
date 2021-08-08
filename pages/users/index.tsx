@@ -4,6 +4,7 @@ import Head from "next/head";
 import { API_ROOT } from "core/constants";
 import { UserItem } from "components/elements/users/UserItem";
 import { Pagination } from "components/widgets/pagination/Pagination";
+import { getUsersPage } from "pages/api/users";
 
 const PER_PAGE: number = 3;
 
@@ -25,6 +26,8 @@ const Page = ({ page, users, totalResults }: IPageProps) => {
   );
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
+    
     getUsersFromApi(page)
       .then(e => {
         const { totalResults, results } = e;
@@ -57,7 +60,7 @@ const Page = ({ page, users, totalResults }: IPageProps) => {
       <Pagination
         firstPagePath={"/users"}
         totalPages={totalPages}
-        page={page}
+        page={parseInt(page as string)}
         path={"/users/page"}
         numeric={true}/>
     </>
@@ -71,13 +74,21 @@ Page.defaultProps = {
 export const getStaticProps = async ({ params }) => {
   const { page } = (params || {});
 
-  const request = await getUsersFromApi(page || 1);
+  const [ count, users ] = await getUsersPage(page || 1);
 
   return {
     props: {
       page: page || 1,
-      users: request.results,
-      totalResults: request.totalResults
+      users: users.map((item) => {
+        for (let key in item) {
+          if (item[key] instanceof Date) {
+            item[key] = item[key].getTime();
+          }
+        }
+
+        return item;
+      }),
+      totalResults: count, 
     }
   };
 };

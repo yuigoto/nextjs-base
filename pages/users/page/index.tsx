@@ -5,7 +5,7 @@ const Page = () => {
   const router = useRouter();
 
   useEffect(() => {
-    router.push("/blog").then(() => {
+    router.push("/users").then(() => {
       if (process.env.NODE_ENV === "development") {
         console.log("Redirect");
       }
