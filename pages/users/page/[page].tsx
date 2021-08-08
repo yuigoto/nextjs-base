@@ -1,101 +1,38 @@
-import Head from "next/head";
-import { Pagination } from "components/elements/Pagination";
-import { GetStaticPaths, GetStaticProps } from "next";
-import axios from "axios";
 import { useEffect, useState } from "react";
-import { UserListItem } from "core/types/users";
-import { UserItem } from "components/users/UserItem";
+import axios from "axios";
+import Head from "next/head";
+import { API_ROOT } from "core/constants";
+import { UserItem } from "components/elements/users/UserItem";
+import { Pagination } from "components/widgets/pagination/Pagination";
 import { getUsersPage } from "pages/api/users";
 
-/**
- * pages/users/page/[page]
- * ----------------------------------------------------------------------
- */
-
-/**
- * Quantos posts por página devem ser exibidos.
- */
 const PER_PAGE: number = 3;
 
-const getPosts = async (page) => {
-  const request = await axios
-    .get(`/api/users?page=${page}`);
-
-  return request.data;
+const getUsersFromApi = async (page) => {
+  const fetch = await axios.get(`${API_ROOT}api/users?page=${page}`);
+  return fetch.data;
 };
 
-/**
- * Para builds estáticos, retorna variáveis para todas as páginas possíveis
- * dentro desta view.
- *
- * @param context
- */
-export const getStaticPaths: GetStaticPaths = async (context) => {
-  const request = await getUsersPage(1);
-  const [ users, count ] = request;
-
-  const paths = [];
-  for (let n = 0; n < count; n++) {
-    // No caso, retornamos todos os possíveis valores para `[id]`
-    paths.push({
-      params: {
-        page: `${n + 1}`
-      }
-    });
-  }
-
-  return {
-    paths,
-    fallback: false
-  };
-};
-
-/**
- * Para builds estáticos, consome as variáveis retornadas por `getStaticPaths`
- * e as converte em props.
- *
- * @param context
- */
-export const getStaticProps: GetStaticProps = async (context) => {
-  const { page } = context.params;
-  const request = await getUsersPage(page);
-  const [ users, count ] = request;
-
-  return {
-    props: {
-      page: page,
-      users: users.map((item) => {
-        return JSON.parse(JSON.stringify(item));
-      }),
-      totalResults: count
-    }
-  };
-};
-
-/**
- * Interface de props da página.
- */
 interface IPageProps {
-  page?: number;
-  users?: UserListItem[];
+  page?: number|string;
+  users?: [];
   totalResults?: number;
 }
 
-const Page = ({
-  page,
-  users,
-  totalResults
-}: IPageProps) => {
+const Page = ({ page, users, totalResults }: IPageProps) => {
   const [ postData, setPostData ] = useState(users);
   const [ totalPages, setTotalPages ] = useState(
     Math.ceil(totalResults / PER_PAGE)
   );
 
   useEffect(() => {
-    getPosts(page)
+    if (typeof window === "undefined") return;
+
+    getUsersFromApi(page)
       .then(e => {
-        setPostData(e.users);
-        setTotalPages(Math.ceil(e.totalResults / PER_PAGE));
+        const { totalResults, results } = e;
+        setPostData(e.results);
+        setTotalPages(Math.ceil(totalResults / PER_PAGE));
       });
   }, [ page ]);
 
@@ -111,19 +48,19 @@ const Page = ({
 
       {postData.map((item, key) => {
         return (
-          <>
+          <div key={key}>
             {key > 0 && (
               <hr key={`hr-${key}`}/>
             )}
             <UserItem post={item} key={key}/>
-          </>
+          </div>
         );
       })}
 
       <Pagination
         firstPagePath={"/users"}
         totalPages={totalPages}
-        page={page}
+        page={parseInt(page as string)}
         path={"/users/page"}
         numeric={true}/>
     </>
@@ -132,6 +69,47 @@ const Page = ({
 
 Page.defaultProps = {
   page: 1
+};
+
+export const getStaticPaths = async (context) => {
+  const [ count, users ] = await getUsersPage(1);
+
+  const paths = [];
+
+  for (let n = 0; n < Math.ceil(count / PER_PAGE); n++) {
+    paths.push({
+      params: {
+        page: `${n + 1}`
+      }
+    });
+  }
+
+  return {
+    paths,
+    fallback: false
+  };
+};
+
+export const getStaticProps = async ({ params }) => {
+  const { page } = (params || {});
+
+  const [ count, users ] = await getUsersPage(page || 1);
+
+  return {
+    props: {
+      page: page || 1,
+      users: users.map((item) => {
+        for (let key in item) {
+          if (item[key] instanceof Date) {
+            item[key] = item[key].getTime();
+          }
+        }
+
+        return item;
+      }),
+      totalResults: count, 
+    }
+  };
 };
 
 export default Page;

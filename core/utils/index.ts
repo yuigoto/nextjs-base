@@ -4,7 +4,8 @@ import { ClassValue, HashMap } from "core/types";
 /**
  * core/utils
  * ----------------------------------------------------------------------
- * Funções utilitárias de uso global.
+ * @author    Fabio Y. Goto <lab@yuiti.dev>
+ * @since     0.0.1
  */
 
 /**
@@ -40,7 +41,6 @@ export const breakpoint = (size?: string): number => {
 export const classnames = (
   ...args: ClassValue[]
 ): string => {
-  const hasOwn: Function = {}.hasOwnProperty
   let returnable: string[] = [];
 
   for (let argument of args) {
@@ -58,13 +58,13 @@ export const classnames = (
       }
     } else if (__type === "object" && __type !== null) {
       if (
-        hasOwn.call(argument, "toString")
+        hasOwn(argument, "toString")
         && argument.toString !== Object.prototype.toString
       ) {
         returnable.push(argument.toString());
       } else {
         for (let key in (argument as any)) {
-          if (hasOwn.call(argument, key) && argument[key]) {
+          if (hasOwn(argument, key) && argument[key]) {
             returnable.push(key);
           }
         }
@@ -89,10 +89,10 @@ export const classnames = (
  *     Originalmente o padding é feito à esquerda, modifique com esta opção
  */
 export const pad = (
-  value: number|string,
+  value: number | string,
   size: number,
   character: string,
-  toRight= false
+  toRight = false
 ): string => {
   if (typeof value === "number") value = value + "";
   return (value.length >= size)
@@ -130,7 +130,7 @@ export const toCurrency = (
   value: number,
   locale = "pt-BR",
   currency = "BRL"
-):string|boolean => {
+): string | boolean => {
   if (typeof value !== "number") return false;
 
   locale = locale || "pt-BR";
@@ -212,18 +212,18 @@ export const serialize = (input: any): string => {
    *     Prefixo para namespacing
    */
   const params = (value: any, prefix: string): HashMap<any> => {
-    let _idx: number|string;
+    let index: number | string;
     let length: number;
     let key: string;
 
     if (prefix) {
       if (Array.isArray(value)) {
-        for (_idx = 0, length = value.length; _idx < length; _idx++) {
+        for (index = 0, length = value.length; index < length; index++) {
           params(
-            value[_idx],
+            value[index],
             prefix
             + "["
-            + ((value[_idx] && typeof value[_idx] === "object") ? _idx : "")
+            + ((value[index] && typeof value[index] === "object") ? index : "")
             + "]"
           );
         }
@@ -235,11 +235,11 @@ export const serialize = (input: any): string => {
         add(prefix, value);
       }
     } else if (Array.isArray(value)) {
-      for (_idx = 0, length = value.length; _idx < length; _idx++) {
-        if (hasOwn(value[_idx], "name") && hasOwn(value[_idx], "value")) {
-          add(value[_idx].name, value[_idx].value);
+      for (index = 0, length = value.length; index < length; index++) {
+        if (hasOwn(value[index], "name") && hasOwn(value[index], "value")) {
+          add(value[index].name, value[index].value);
         } else {
-          params(value[_idx], `[${_idx}]`);
+          params(value[index], `[${index}]`);
         }
       }
     } else {
@@ -278,12 +278,12 @@ export const toSafeUrlName = (value: any, trim = false): string => {
   if (true === trim) _value = _value.trim();
 
   return _value
-  .normalize("NFD")
-  .replace(/[\u0300-\u036f]/g, "")
-  .toLowerCase()
-  .replace(/[^a-z0-9\s]/g, "")
-  .replace(/\s\s/g, "-")
-  .replace(/\s/g, "-");
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, "")
+    .replace(/\s\s/g, "-")
+    .replace(/\s/g, "-");
 };
 
 /**
@@ -329,14 +329,14 @@ export const copyToClipboard = (classOrId: string, callback?: (boolean) => any) 
     if (callback) callback(copied);
   } else {
     navigator
-    .clipboard
-    .writeText(value)
-    .then(() => {
-      if (callback) callback(true);
-    })
-    .catch(err => {
-      console.error("Não foi possível copiar.");
-      if (callback) callback(false);
-    });
+      .clipboard
+      .writeText(value)
+      .then(() => {
+        if (callback) callback(true);
+      })
+      .catch(err => {
+        console.error("Não foi possível copiar.");
+        if (callback) callback(false);
+      });
   }
 };

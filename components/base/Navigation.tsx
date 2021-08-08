@@ -1,7 +1,7 @@
-import { Anchor } from "components/atoms/elements/Anchor";
 import { useRouter } from "next/router";
+import { Anchor } from "components/elements/link/Anchor";
 
-import Styles from "styles/elements/Navigation.module.scss";
+import Styles from "components/base/Navigation.module.scss";
 
 const routes = [
   {
@@ -9,12 +9,8 @@ const routes = [
     path: "/"
   },
   {
-    name: "Átomos",
-    path: "/atoms"
-  },
-  {
-    name: "Moléculas",
-    path: "/molecules"
+    name: "Elementos",
+    path: "/elements"
   },
   {
     name: "Blog",
@@ -23,10 +19,6 @@ const routes = [
   {
     name: "Teste",
     path: "/demo"
-  },
-  {
-    name: "Blog",
-    path: "/blog"
   },
   {
     name: "Usuários",

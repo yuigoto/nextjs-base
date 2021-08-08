@@ -1,0 +1,41 @@
+@use "sass:math";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
+
+$fa-font-path: "~@fortawesome/fontawesome-free/webfonts";
+$font-family-sans-serif: "Inter", sans-serif;
+
+@import "~bootstrap/scss/bootstrap";
+@import "~@fortawesome/fontawesome-free/scss/fontawesome";
+@import "~@fortawesome/fontawesome-free/scss/brands";
+@import "~@fortawesome/fontawesome-free/scss/regular";
+@import "~@fortawesome/fontawesome-free/scss/solid";
+@import "~highlight.js/scss/monokai-sublime";
+
+a {
+  color: #666;
+  font-weight: 600;
+  text-decoration: none;
+  transition: .3s;
+
+  &:hover {
+    color: #999;
+    text-decoration: none;
+  }
+
+  &:active {
+    color: #bbb;
+  }
+}
+
+.h1,
+.h2,
+.h3,
+.h4,
+.h5,
+.h6 {
+  display: block;
+}
+
+img {
+  max-width: 100%;
+}

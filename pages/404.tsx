@@ -1,13 +1,8 @@
 import { useRouter } from "next/router";
-import Link from "next/link";
 import Head from "next/head";
+import { Anchor } from "components/elements/link/Anchor";
 
-/**
- * pages/404
- * ----------------------------------------------------------------------
- * Página de erro 404 padrão.
- */
-const NotFoundPage = () => {
+const Page = () => {
   const router = useRouter();
 
   return (
@@ -19,12 +14,14 @@ const NotFoundPage = () => {
       <h2 className={"display-4 text-muted"}>404</h2>
 
       <p>
-        <Link href={"/"}>&lt;&lt; Home</Link>
+        <Anchor href={"/"}>&lt;&lt; Home</Anchor>
       </p>
 
-      <p><strong>Você acessou</strong>: <code>{router.asPath}</code></p>
+      <p>
+        <strong>Você acessou</strong>: <code>{router.asPath}</code>
+      </p>
     </>
   );
 };
 
-export default NotFoundPage;
+export default Page;

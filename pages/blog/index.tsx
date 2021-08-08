@@ -1,38 +1,18 @@
 import Head from "next/head";
-import { getMarkdownIndex } from "core/utils/markdown";
 import { BlogListItem } from "core/types/blog";
-import { Pagination } from "components/elements/Pagination";
-import { BlogItem } from "components/blog/BlogItem";
+import { getMarkdownIndex } from "core/utils/markdown";
+import { BlogItem } from "components/elements/blog/BlogItem";
+import { Pagination } from "components/widgets/pagination/Pagination";
 
-/**
- * pages/blog
- * ----------------------------------------------------------------------
- */
-
-/**
- * Quantos posts por página devem ser exibidos.
- */
 const PER_PAGE: number = 5;
 
-/**
- * Interface de props da página.
- */
 interface IPageProps {
   page?: number;
+  pageData?: Array<any>;
+  totalPages?: number;
 }
 
-const Page = ({
-  page
-}: IPageProps) => {
-  const blog: BlogListItem[] = getMarkdownIndex("blog");
-  blog.sort((a, b) => {
-    return a.date < b.date ? 1 : -1;
-  });
-  const totalPages = Math.ceil(blog.length / PER_PAGE);
-  const offset = (page - 1) * PER_PAGE;
-  const limit = offset + PER_PAGE;
-  const pageData = blog.slice(offset, limit);
-
+const Page = ({ page, pageData, totalPages }: IPageProps) => {
   const posts = pageData.map((item, key) => {
     return (
       <BlogItem post={item} key={key}/>
@@ -56,7 +36,8 @@ const Page = ({
             totalPages={totalPages}
             page={page}
             path={"blog/page"}
-            numeric={true}/>
+            firstPagePath={"/blog"}
+            numeric={true} />
         </div>
       )}
 
@@ -69,6 +50,27 @@ const Page = ({
 
 Page.defaultProps = {
   page: 1
+};
+
+export const getStaticProps = async ({ params }) => {
+  const { page } = (params || {});
+
+  const blogList: BlogListItem[] = getMarkdownIndex("blog");
+  blogList.sort((a, b) => {
+    return a.date < b.date ? 1 : -1;
+  });
+  const totalPages = Math.ceil(blogList.length / PER_PAGE);
+  const offset = ((parseInt(page) || 1) - 1) * PER_PAGE;
+  const limit = offset + PER_PAGE;
+  const pageData = blogList.slice(offset, limit);
+
+  return {
+    props: {
+      pageData,
+      page: parseInt(page) || 1,
+      totalPages,
+    }
+  };
 };
 
 export default Page;

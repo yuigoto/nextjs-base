@@ -1,89 +1,123 @@
-require("dotenv/config");
-import "reflect-metadata";
-import { MikroORM } from "@mikro-orm/core";
-import config from "config/mikro-orm";
-import { Todo } from "entities/Todo";
+import prisma from "core/prisma";
 import { ApiEndpoint } from "core/types";
+import { hasOwn } from "core/utils";
 
-const PER_PAGE: number = 5;
+const getHandler: ApiEndpoint = async (req, res) => {
+  let page = parseInt(req.query.page as string) || 1;
+  let perPage = parseInt(req.query.perPage as string) || 5;
 
-const getHandler:ApiEndpoint = async (req, res) => {
-  const { page } = req.query;
-
-  const orm = await MikroORM.init(config);
-  const [ todos, count ] = await orm.em.findAndCount(
-    Todo,
-    {},
-    {
-      limit: PER_PAGE,
-      offset: (parseInt(`${page}`) - 1) * PER_PAGE
-    }
-  );
+  const [ count, todos ] = await prisma.$transaction([
+    prisma.todo.count(),
+    prisma.todo.findMany({
+      skip: (parseInt(`${page}`) - 1) * perPage,
+      take: perPage
+    })
+  ]);
 
   res
     .status(200)
     .json({
-      todos,
-      totalResults: count
+      success: true,
+      results: todos,
+      totalResults: count,
     });
 };
 
 const postHandler: ApiEndpoint = async (req, res) => {
-  const { api_secret } = req.headers;
+  const { body } = req;
 
-  if (api_secret !== process.env.API_SECRET) {
-    res
-      .status(401)
-      .json({
-        message: "API secret inválido ou não fornecido."
-      })
-    return;
+  if (!hasOwn(body, "name")) {
+    throw new Error("Request inválido.");
   }
 
-  const {
-    name,
-    description
-  } = req.body;
+  let create = await prisma.todo.create({
+    data: {
+      name: body.name,
+      description: body.description || "",
+    },
+  });
 
-  if (!name || !description) {
-    res
-      .status(400)
-      .json({
-        message: "Nome e descrição são obrigatórios."
-      });
+  res
+    .status(200)
+    .json({
+      success: true,
+      result: create
+    });
+};
+
+const putHandler: ApiEndpoint = async (req, res) => {
+  const { body } = req;
+
+  if (!hasOwn(body, "id")) {
+    throw new Error("Forneça um ID válido.");
   }
 
-  const orm = await MikroORM.init(config);
-  let todo: Todo = new Todo(name, description);
+  if (!hasOwn(body, "name")) {
+    throw new Error("Request inválido.");
+  }
 
+  let put = await prisma.todo.update({
+    data: {
+      name: body.name,
+      description: body.description || "",
+    },
+    where: {
+      id: body.id
+    }
+  });
+
+  res
+    .status(200)
+    .json({
+      success: true,
+      result: put
+    });
+};
+
+const deleteHandler: ApiEndpoint = async (req, res) => {
+  const todoId = parseInt(req.body.id as string);
+
+  if (isNaN(todoId)) {
+    throw new Error("Forneça um ID válido.");
+  }
+
+  let exclude = await prisma.todo.delete({
+    where: {
+      id: todoId
+    }
+  });
+
+  res
+    .status(200)
+    .json({
+      success: true,
+      message: "Tarefa excluída com sucesso."
+    });
+};
+
+const endpoint: ApiEndpoint = async (req, res) => {
   try {
-    await orm.em.persistAndFlush(todo);
-    res
-      .status(200)
-      .json({
-        message: "Sucesso!"
-      });
+    switch (req.method) {
+      // case "POST":
+      //   await postHandler(req, res); break;
+      // case "PUT":
+      //   await putHandler(req, res); break;
+      // case "DELETE":
+      //   await deleteHandler(req, res); break;
+      default:
+        await getHandler(req, res); break;
+    }
   } catch (e) {
     res
       .status(400)
       .json({
-        message: "Erro ao salvar TODO."
+        success: false,
+        message: e.meta.cause || e.message || "Request inválido.",
+        details: {
+          ...e
+        }
       });
   }
 };
 
-/**
- * api/todo
- * ----------------------------------------------------------------------
- * @param req
- * @param res
- */
-const handler: ApiEndpoint = async (req, res) => {
-  if (req.method === "POST") {
-    await postHandler(req, res);
-  } else {
-    await getHandler(req, res);
-  }
-};
-
-export default handler;
+export default endpoint;

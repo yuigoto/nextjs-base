@@ -1,17 +1,16 @@
+import { Heading } from "components/elements/typography/Heading";
+import { Anchor } from "components/elements/link/Anchor";
 import { BaseProps, HashMap } from "core/types";
-import { FunctionComponent } from "react";
 import { classnames } from "core/utils";
-import { Heading } from "components/atoms/typography/Heading";
-import { Anchor } from "components/atoms/elements/Anchor";
 import { HeaderContainer } from "components/base/containers";
 
 interface IHeaderProps extends BaseProps {}
 
-export const Header: FunctionComponent<IHeaderProps> = ({
+export const Header = ({
   id,
   className,
   style
-}) => {
+}: IHeaderProps) => {
   const _attr: HashMap<any> = {};
   if (id) _attr.id = id;
   if (className) _attr.className = classnames(className);

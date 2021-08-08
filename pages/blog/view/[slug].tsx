@@ -1,80 +1,26 @@
-import { GetStaticPaths, GetStaticProps } from "next";
+import { useRouter } from "next/router";
 import { BlogListItem } from "core/types/blog";
 import { getMarkdownIndex } from "core/utils/markdown";
-import Head from "next/head";
-import { useRouter } from "next/router";
-import { useEffect } from "react";
 import { IMarkdownFile } from "core/interfaces";
-import { DateTime } from "components/atoms/basic/DateTime";
+import { useEffect } from "react";
+import Head from "next/head";
+import { renderDate } from "core/utils/datetime";
 
-/**
- * pages/blog/view/[slug]
- * ----------------------------------------------------------------------
- */
-
-/**
- * Para builds estáticos, retorna variáveis para todas as páginas possíveis
- * dentro desta view.
- *
- * @param context
- */
-export const getStaticPaths: GetStaticPaths = async (context) => {
-  const blog: BlogListItem[] = getMarkdownIndex("blog");
-
-  const paths = [];
-  for (const post of blog) {
-    // No caso, retornamos todos os possíveis valores para `[id]`
-    paths.push({
-      params: {
-        slug: post.slug
-      }
-    });
-  }
-
-  return {
-    paths,
-    fallback: false
-  };
-};
-
-/**
- * Para builds estáticos, consome as variáveis retornadas por `getStaticPaths`
- * e as converte em props.
- *
- * @param context
- */
-export const getStaticProps: GetStaticProps = async ({ params }) => {
-  const { slug } = params;
-
-  return {
-    props: {
-      slug
-    }
-  };
-};
-
-/**
- * Interface de props da página.
- */
 interface IPageProps {
+  post: BlogListItem;
   slug: string;
 }
 
-const Page = ({
-  slug
-}: IPageProps) => {
+const Page = ({ post, slug }: IPageProps) => {
   const router = useRouter();
-  const blog: Array<BlogListItem> = getMarkdownIndex("blog");
-  const post: BlogListItem = blog.find((item) => item.slug === slug);
-  let file: IMarkdownFile = require(`data/blog/${post.file}.md`);
 
   useEffect(() => {
-    if (!file) {
+    if (null === post) {
       router.push("/404").then(e => console.log(e));
     }
-  }, []);
+  });
 
-  if (!file) return null;
+  let file: IMarkdownFile = require(`data/blog/${post.file}.md`);
 
   const {
     react: PostBody
@@ -107,17 +53,17 @@ const Page = ({
 
       <p className={"lead"}>{post.excerpt}</p>
 
-      <p><em><DateTime date={post.date} format={"long"}/></em></p>
+      <p><em>{renderDate(post.date, "long")}</em></p>
 
       <hr/>
 
-      <PostBody/>
+      <PostBody />
 
       <hr/>
 
       <p>
         <em>
-          Postado às <DateTime date={post.date} format={"time"}/>
+          Postado às {renderDate(post.date, "time")}
         </em>
       </p>
 
@@ -128,6 +74,38 @@ const Page = ({
       </p>
     </>
   );
+};
+
+export const getStaticPaths = async (context) => {
+  const blog: BlogListItem[] = getMarkdownIndex("blog");
+
+  const paths = [];
+  for (let post of blog) {
+    paths.push({
+      params: {
+        slug: post.slug
+      }
+    });
+  }
+
+  return {
+    paths,
+    fallback: false
+  };
+};
+
+export const getStaticProps = async ({ params }) => {
+  const { slug } = (params || {});
+
+  const blog: Array<BlogListItem> = getMarkdownIndex("blog");
+  const post: BlogListItem = blog.find((item) => item.slug === slug);
+
+  return {
+    props: {
+      slug,
+      post: post || null,
+    }
+  };
 };
 
 export default Page;

@@ -1,16 +1,19 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { NextRouter } from "next/router";
 import { IClassArray } from "core/interfaces";
-import { ButtonHTMLAttributes, DetailedHTMLProps, FunctionComponent, HTMLAttributes } from "react";
+import { 
+  ButtonHTMLAttributes, 
+  DetailedHTMLProps, 
+  FunctionComponent, 
+  HTMLAttributes 
+} from "react";
 
 /**
  * core/types
  * ----------------------------------------------------------------------
- * Assinaturas de tipos genéricos.
+ * @author    Fabio Y. Goto <lab@yuiti.dev>
+ * @since     0.0.1
  */
-
-// BÁSICOS
-// ----------------------------------------------------------------------
 
 /**
  * Hashmap simples.
@@ -85,7 +88,7 @@ export type ButtonComponent<T> = FunctionComponent<ButtonComponentType<T>>;
  *
  * Usado pela lib `classnames`.
  */
-export type ClassValue = string|number|HashMap<any>|IClassArray|undefined|null|boolean;
+export type ClassValue = string | number | HashMap<any> | IClassArray | undefined | null | boolean;
 
 /**
  * Ação para reducer de contexto.
@@ -104,6 +107,11 @@ export type ContextDispatcher = (data: ContextAction) => void;
  * Reducer para contexto.
  */
 export type ContextReducer<T> = (state: T, action: ContextAction) => T;
+
+/**
+ * Formatos de data suportados.
+ */
+export type DateFormats = "iso"|"utc"|"long"|"short"|"short-time"|"time"|null|undefined;
 
 /**
  * Props básicas para componentes de classe com route awareness.

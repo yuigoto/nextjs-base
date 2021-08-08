@@ -3,6 +3,13 @@ import { ContextReducer, HashMap } from "core/types";
 import { getStateActionStatus } from "core/utils/state";
 
 /**
+ * state/ducks/loader
+ * ----------------------------------------------------------------------
+ * @author    Fabio Y. Goto <lab@yuiti.dev>
+ * @since     0.0.1
+ */
+
+/**
  * Estado inicial.
  */
 const initialState: HashMap<any> = {};
